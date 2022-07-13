@@ -1,0 +1,15 @@
+
+
+
+{% for leak in leaks %}
+<div>
+    <h4>{{leak.title}}</h4>
+    <p>
+        {{leak.story|safe}}
+
+        <a href="{% url 'draft:leak-draft-detail' leak.id %}">See More</a> 
+    </p>
+</div>
+{% endfor %}
+
+

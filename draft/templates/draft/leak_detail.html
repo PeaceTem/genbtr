@@ -1,0 +1,13 @@
+
+
+
+<div>
+    <h4>{{draft.title}}</h4>
+    <p>
+        {{draft.story|safe}}
+        <a href="{% url 'draft:leak-draft-edit' draft.id %}">Edit Item</a> 
+        <a href="{% url 'draft:leak-draft-delete' draft.id %}">Delete Item</a> 
+
+        <a href="{% url 'draft:convert-draft-to-leak' draft.id %}">Convert to a Leak</a> 
+    </p>
+</div>

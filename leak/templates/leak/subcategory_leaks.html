@@ -1,0 +1,14 @@
+
+{% extends 'leak/base.html' %}
+
+{% block content %}
+
+<h2>
+    {{subcategory.title}}
+</h2>
+<a href="{% url 'leak:leak-create' category.id subcategory.id %}">Create a leak</a>
+{% for leak in leaks %}
+    {% include 'leak/leak.html' %}
+{% endfor %}
+
+{% endblock content %}

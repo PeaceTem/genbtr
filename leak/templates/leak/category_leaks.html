@@ -1,0 +1,36 @@
+
+{% extends 'leak/base.html' %}
+
+
+
+{% block content %}
+
+<h2>
+    {{category.title}}
+</h2>
+
+
+
+<div>
+    {{category.description}}
+</div>
+
+
+
+<h3>Countries(Sub-Categories)</h3>
+<button><a href="{% url 'leak:subcategory-create' category.id %}">Create your own Country</a></button>
+{% for s in subcategories %}
+    <!-- <h5>
+        {{s.title}}
+    </h5>
+    <div>
+        {{s.description|safe}}
+    </div> -->
+    <a href="{% url 'leak:subcategory-leaks' category.id s.id %}">{{s.title}}</a>
+{% endfor %}
+
+{% for leak in leaks %}
+    {% include 'leak/leak.html' %}
+{% endfor %}
+
+{% endblock content %}

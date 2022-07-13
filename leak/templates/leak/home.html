@@ -1,0 +1,29 @@
+
+
+{% extends 'leak/base.html' %}
+
+
+
+{% block content %}
+
+
+<h1>GenBTR(Generation Born To Rule)</h1>
+
+<h3>
+    Continents (Categories)
+</h3>
+
+{% for c in categories %}
+    <div>
+        <a href="{% url 'leak:category-leaks' c.id %}">{{c.title|safe}}</a>
+    </div>
+{% endfor %}
+<h3>
+    Trending Leaks
+</h3>
+{% for leak in leaks %}
+    {% include 'leak/leak.html' %}
+{% endfor %}
+create a footer template
+
+{% endblock content %}

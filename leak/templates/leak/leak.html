@@ -1,0 +1,9 @@
+
+
+<div>
+    <h4>{{leak.title}}</h4>
+    <p>
+        {{leak.story|safe}}
+        <a href="{% url 'leak:leak-detail' leak.id %}">See More</a> 
+    </p>
+</div>

@@ -1,0 +1,15 @@
+{% load social_share %}
+
+<div class="social-share">
+    <i style="font-size: 11px; color: #999;">
+        Share to other social media
+    </i>
+{% post_to_facebook  object_or_url 'Facebook' %}
+{% post_to_twitter "GenBTR: {{leak.title}} -> {{leak.story|truncatewords:30|safe}}" object_or_url "Twitter" %}
+{% post_to_linkedin  object_or_url "LinkedIn" %}
+{% send_email "GenBTR" "{{leak.title}} -> {{leak.story|safe}}" object_or_url "Email" %}
+{% post_to_reddit "GenBTR: {{leak.title}} -> {{leak.story|truncatewords:30|safe}}" object_or_url "Reddit" %}
+{% post_to_telegram "GenBTR: {{leak.title}} -> {{leak.story|truncatewords:30|safe}}" object_or_url "Telegram" %}
+{% post_to_whatsapp object_or_url "WhatsApp" %}
+{% save_to_pinterest object_or_url "Pinterest" %}
+</div>
