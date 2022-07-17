@@ -2,9 +2,20 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
 
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
+
+from src.utils import LANGUAGES, getSimplifiedNumber
+
+
+from django.core.exceptions import ValidationError
+
+
+from .utils import generate_ref_code
+
+from django.urls import reverse_lazy
 # Create your models here.
 
 """
@@ -115,7 +126,7 @@ Countries = (
    (_('Honduras'),_('Honduras')),
 )
 
-Categories = (
+CATEGORY = (
     'Lifestyle',
     'Education',
     'Movies',
@@ -170,70 +181,14 @@ Categories = (
 
 
 
-# whenever a category is created there should be a subcategory created automatically with it. And the name of the subcategory will be all.
-class Category(models.Model):
-    title = models.CharField(max_length=100, unique=True, verbose_name=_('title'))
-    description = RichTextField(verbose_name=_('description'))
-    number_of_leaks = models.PositiveIntegerField(default=0, verbose_name=_('number of leaks'))
-    date = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        verbose_name_plural = 'categories'
-
-    def __str__(self):
-        return f"{self.title}"
-
-
-
-
-
-class Subcategory(models.Model):
-    category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.CASCADE, related_name='category')
-    title = models.CharField(max_length=100, verbose_name=_('title'))
-    description = RichTextField(verbose_name=_('description'))
-    number_of_leaks = models.PositiveIntegerField(default=0, verbose_name=_('number of leaks'))
-    date = models.DateTimeField(auto_now_add=True)
-    # moderators = models.ManyToManyField(User, blank=True, related_name='moderators')
-    creator = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL, related_name='subcategory')
-
-    class Meta:
-        verbose_name_plural = 'subcategories'
-
-    def __str__(self):
-        return f"{self.title}"
-
-
-
-
-
-"""
-Anything here should be replicated in the draft leak model
-"""
-
-
-
-class Leak(models.Model):
-    title = models.CharField(max_length=200, verbose_name=_('title'))
-    story = RichTextField(verbose_name=_('story'), null=True) # try to change the verbose name and see what will happen 
-    votes = models.IntegerField(default=0, verbose_name=_('votes'))
-    date = models.DateTimeField(auto_now_add=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True, related_name='leak_category')
-    subcategory = models.ForeignKey(Subcategory, on_delete=models.CASCADE, null=True, blank=True, related_name='leak_subcategory')
-    views = models.IntegerField(default=0)
-
-
-
-    def __str__(self):
-        return f"{self.title}"
-
-
 
 
 
 class Image(models.Model):
     title = models.CharField(max_length=100, verbose_name=_('title'))
     image = models.ImageField(upload_to='leak/images/', verbose_name=_('image'))
-    leak = models.ForeignKey(Leak, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_image')
+
+
 
 
     def __str__(self):
@@ -247,7 +202,6 @@ class Image(models.Model):
 class Audio(models.Model):
     title = models.CharField(max_length=100, verbose_name=_('title'))
     audio = models.FileField(upload_to='leak/audios/', verbose_name=_('audio'))
-    leak = models.ForeignKey(Leak, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_audio')
 
 
     def __str__(self):
@@ -261,7 +215,6 @@ class Audio(models.Model):
 class File(models.Model):
     title = models.CharField(max_length=100, verbose_name=_('title'))
     file = models.FileField(upload_to='leak/files/', verbose_name=_('file'))
-    leak = models.ForeignKey(Leak, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_file')
 
 
 
@@ -277,7 +230,6 @@ class File(models.Model):
 class Video(models.Model):
     title = models.CharField(max_length=100, verbose_name=_('title'))
     video = models.FileField(upload_to='leak/videos/', verbose_name=_('video'))
-    leak = models.ForeignKey(Leak, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_video')
 
 
     def __str__(self):
@@ -287,19 +239,128 @@ class Video(models.Model):
 
 
 
-# class Section(models.Model):
-#     # use rich text field
-#     header = models.CharField(max_length=100, verbose_name=_('header'))
-#     text = RichTextField(verbose_name=_('text'))
-#     images = models.ManyToManyField(Image, blank=True, related_name='images')
-#     audios = models.ManyToManyField(Audio, blank=True, related_name='audios')
-#     files = models.ManyToManyField(File, blank=True, related_name='files')
-#     videos = models.ManyToManyField(Video, blank=True, related_name='videos')
-#     index = models.PositiveSmallIntegerField(default=0)
 
-#     def __str__(self):
-#         return f"{self.header}"
+class Category(models.Model):
+    title = models.CharField(max_length=100, unique=True, verbose_name=_('title'))
+    description = RichTextField(verbose_name=_('description'))
+    number_of_leaks = models.PositiveIntegerField(default=0, verbose_name=_('number of leaks')) # remove this field
+    date = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(null=True, unique=True)
+    views = models.PositiveIntegerField(default=0)
 
+
+
+
+    class Meta:
+        verbose_name_plural = 'categories'
+
+    def __str__(self):
+        return f"{self.title}"
+
+
+
+    def get_absolute_url(self):
+        return reverse_lazy("leak:category-leaks", kwargs={"slug": self.slug})
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+
+
+
+
+class Subcategory(models.Model):
+    category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.CASCADE, related_name='subcategories')
+    title = models.CharField(max_length=100, verbose_name=_('title'), unique=True)
+    description = RichTextField(verbose_name=_('description'))
+    picture = models.OneToOneField(Image, on_delete=models.SET_NULL, related_name='subcategory', null=True, blank=True, verbose_name=_('picture'))
+    number_of_leaks = models.PositiveIntegerField(default=0, verbose_name=_('number of leaks'))
+    date = models.DateTimeField(auto_now_add=True)
+    creator = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL, related_name='created_subcategory')
+    language = models.CharField(max_length=100, choices=LANGUAGES, default='en', verbose_name=_("Official Language"))
+    slug = models.SlugField(null=False, unique=True)
+    members = models.ManyToManyField(User, blank=True, related_name='subcategories')
+    views = models.PositiveIntegerField(default=0)
+    likes = models.ManyToManyField(User, blank=True, related_name='subcategories_liked')
+
+    class Meta:
+        verbose_name_plural = 'subcategories'
+
+    def __str__(self):
+        return f"{self.title}"
+
+
+    def get_absolute_url(self):
+        return reverse_lazy("leak:subcategory-leaks", kwargs={"slug": self.slug})
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+
+
+class Constitution(models.Model):
+    subcategory = models.OneToOneField(Subcategory, on_delete=models.CASCADE, related_name='constitution')
+    law = RichTextField(verbose_name=_('law'))
+
+
+    def __str__(self):
+        return f"{self.subcategory}"
+
+
+
+
+
+
+"""
+Anything here should be replicated in the draft leak model
+"""
+
+
+
+
+class Leak(models.Model):
+    title = models.CharField(max_length=200, verbose_name=_('title'))
+    story = RichTextField(verbose_name=_('story'), null=True) # try to change the verbose name and see what will happen 
+    date = models.DateTimeField(auto_now_add=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True, related_name='leaks_category')
+    subcategory = models.ForeignKey(Subcategory, on_delete=models.CASCADE, null=True, blank=True, related_name='leaks_subcategory')
+    views = models.PositiveIntegerField(default=0)
+    upvotes = models.PositiveIntegerField(default=0)
+    downvotes = models.PositiveIntegerField(default=0)
+    voters = models.ManyToManyField(User, blank=True, related_name='leaks_voted')
+    slug = models.SlugField(null=True, unique=True)
+    shares = models.PositiveIntegerField(default=0)
+
+
+
+
+    class Meta:
+        ordering = ('-id',)
+
+    def __str__(self):
+        return f"{self.title}"
+
+
+
+    def get_absolute_url(self):
+        return reverse_lazy("leak:leak-detail", kwargs={"slug": self.slug})
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+
+
+
+    @property
+    def get_number_of_upvotes(self):
+
+        return getSimplifiedNumber(self.upvotes)
+
+
+    @property
+    def get_number_of_downvotes(self):
+
+        return getSimplifiedNumber(self.downvotes)
 
 
 
@@ -310,7 +371,7 @@ class Comment(models.Model):
     comment = models.CharField(max_length=500, verbose_name=_('comment'))
     date = models.DateTimeField(auto_now_add=True)
     votes = models.IntegerField(default=0)
-    leak = models.ForeignKey(Leak, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_comment')
+    leak = models.ForeignKey(Leak, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_comments')
 
     class Meta:
         ordering = ('votes',)
@@ -330,7 +391,7 @@ class Reply(models.Model):
     reply = models.CharField(max_length=500, verbose_name=_('reply'))
     votes = models.IntegerField(default=0)
     date = models.DateTimeField(auto_now_add=True)
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_comment_reply')
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True, related_name='leak_comment_replies')
 
     class Meta:
         verbose_name_plural = 'replies'

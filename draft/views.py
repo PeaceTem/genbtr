@@ -12,6 +12,8 @@ from django.urls import reverse_lazy
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 
 from .models import DraftLeak
 from leak.models import Subcategory, Leak, Category
@@ -24,6 +26,8 @@ from .forms import DraftLeakForm
 
 
 class DraftLeakCreate(LoginRequiredMixin, View):
+    redirect_field_name = 'next'
+
     def get(self, request, category_id, subcategory_id):
         form = LeakForm()
         context = {
@@ -93,6 +97,7 @@ class DraftLeakUpdate(LoginRequiredMixin, UpdateView):
     # fields = ('title', 'story')
     form_class = DraftLeakForm
     success_url = reverse_lazy('draft:leak-draft-list')
+    redirect_field_name = 'next'
 
 
 
@@ -100,7 +105,7 @@ class DraftLeakUpdate(LoginRequiredMixin, UpdateView):
 
 
 class DraftLeakList(LoginRequiredMixin, ListView):
-    
+    redirect_field_name = 'next'
     model = DraftLeak
     template_name= 'draft/leak_list.html'
     context_object_name = 'leaks'
@@ -113,14 +118,23 @@ class DraftLeakList(LoginRequiredMixin, ListView):
 
 
 class DraftLeakDetail(LoginRequiredMixin, DetailView):
+    redirect_field_name = 'next'
     model = DraftLeak
     template_name= 'draft/leak_detail.html'
     context_object_name = 'draft'
 
+    def get(self, request, pk):
+        try:
+            if DraftLeak.objects.get(id=pk):
+                return super(DraftLeakDetail, self).get(request, pk)
+        except:
+            pass
+        return redirect('draft:leak-draft-list')
 
 
 
 class DraftLeakDelete(LoginRequiredMixin, View):
+    redirect_field_name = 'next'
 
     def get(self, request, pk):
         draft = DraftLeak.objects.get(id=pk)
@@ -138,6 +152,7 @@ class ConvertDraftToLeak(LoginRequiredMixin, View):
             leak = Leak.objects.create(title=draft.title, story=draft.story, category=draft.category, subcategory=draft.subcategory)
             draft.delete()
         except:
+            messages.error(self.request, _(f"Don't leave any field blank"))
             return redirect(self.request.META['HTTP_REFERER'])
 
         return redirect('leak:leak-detail', pk=leak.id)

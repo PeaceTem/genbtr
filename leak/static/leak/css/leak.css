@@ -1,0 +1,55 @@
+:root{
+    --card-background-color: #fff;
+    --background-color: #dfdfdf;
+    --theme-color: linear-gradient(30deg, rgb(75, 180, 75), rgb(12, 243, 12));
+    --white-theme: #fff;
+    --dark-theme: #555;
+    --link-color: green;
+}
+
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    color: var(--dark-theme);
+    transition: all 0.3s ease-in-out;
+    word-wrap: break-word;
+}
+
+
+
+.link{
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+
+#create-leak, #top-link{
+    position: fixed;
+    background: var(--theme-color);
+    border-radius: 10px;
+    padding: 10px;
+    bottom: 10px;
+    box-shadow: 0 0 10px #666;
+}
+
+
+#create-leak{
+    right: 20px
+}
+#top-link{
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    left: 20px;
+}
+
+#create-leak a, #top-link a{
+    text-decoration: none;
+    font-size: 30px;
+    color: var(--white-theme);
+    background: var(--theme-color);
+}

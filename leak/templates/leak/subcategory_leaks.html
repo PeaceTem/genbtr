@@ -1,14 +1,103 @@
 
-{% extends 'leak/base.html' %}
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'leak/css/leak.css' %}">
+{% endblock css %}
+
+{% block title %}
+Leak | country
+{% endblock title %}
+
 
 {% block content %}
 
-<h2>
-    {{subcategory.title}}
+<h2 id="top">
+    {{subcategory.title}} | {{subcategory.leaks_subcategory.all.count}} leaks
 </h2>
-<a href="{% url 'leak:leak-create' category.id subcategory.id %}">Create a leak</a>
+<h4>Members : {{subcategory.members.all.count}}</h4>
+
+Test this function for a user that is not authenticated
+    {% if not subcategory in user.subcategories_liked.all %}
+        <span><a href="{% url 'leak:like-country' subcategory.id %}">Like</a></span>
+    {% else %}
+        <span><a href="{% url 'leak:unlike-country' subcategory.id %}">Unlike</a></span>
+    {% endif %}
+
+    {% if not subcategory in user.subcategories.all  %}
+        <span><a onclick="" href="{% url 'leak:citizenship-apply' subcategory.slug %}">Apply for citizenship</a></span>
+    {% else %}
+        <span><a onclick="" href="{% url 'leak:citizenship-renounce' subcategory.slug %}">Renounce citizenship</a></span>
+    {% endif %}
+
+
+<div>
+    <a href="{% url 'leak:constitution' subcategory.constitution.id %}">Read the constitution of this country</a>
+</div>
+<div>
+    <a href="{% url 'leak:constitution-edit' subcategory.constitution.id %}">Edit the constitution of this country</a>
+</div>
+<div>
+    <img src="{{subcategory.picture.image.url}}" alt="{{subcategory.picture.title}}">
+</div>
+
+
+<div class="card-container infinite-container">
+
 {% for leak in leaks %}
     {% include 'leak/leak.html' %}
 {% endfor %}
 
+
+<div id="create-leak">
+    <a  href="{% url 'leak:leak-create' category.id subcategory.id %}">+</a>
+</div>
+
+
+<div id="top-link">
+    <a  href="#top">↑</a>
+</div>
+
+</div>
+
+<div class="d-flex d-none position-fixed" style="color:white;bottom:2vh;left:46vw">
+    <button style="display:none;" class="btn btn-danger loading">
+        <span style="color:white; display:none" class="spinner-border spinner-border-sm"></span>
+    </button>
+</div>
+
+
+<div class="row d-none">
+    <div class="col-12">
+        {% if leaks.has_next %}
+        <a class="infinite-more-link" href="?page={{ leaks.next_page_number }}">next</a>
+        {% endif %}
+        </span>
+    </div>
+</div>
+
+{% include 'jquery.html' %}
+
+<script src="/static/leak/js/leak.js"></script>
+<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'js/infinite.min.js' %}"></script>
+<script>
+    var infinite = new Waypoint.Infinite({
+        element: $('.infinite-container')[0],
+
+        offset: 'bottom-in-view',
+
+        onBeforePageLoad: function () {
+            $('.loading').show();
+        },
+        onAfterPageLoad: function () {
+            $('.loading').hide();
+
+        }
+        
+    
+    });
+</script>
 {% endblock content %}

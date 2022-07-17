@@ -18,6 +18,7 @@ class RegisterPage(FormView):
     form_class = CustomUserForm
     redirect_authenticated_user = True
     success_url = reverse_lazy('leak:home')
+    
         
     def form_valid(self, form):
         # form.save()

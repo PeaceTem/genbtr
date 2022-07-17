@@ -22,12 +22,14 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('pwa.urls')),
-    path('leak/', include('leak.urls', namespace='leak')),
+    path('leak-', include('leak.urls', namespace='leak')), # change the add share count ajax url if this path is changed
     path('ckeditor/', include('ckeditor_uploader.urls')), # r'^ckeditor/'
     path('src/', include('src.urls', namespace='src')),
     path('auth/', include('BTRauth.urls', namespace='auth')),
     path('draft/', include('draft.urls', namespace='draft')),
     path('archive/', include('archive.urls', namespace='archive')),
+    path('@', include('genz.urls', namespace='genz')),
+
 ]
 
 if settings.DEBUG == True:

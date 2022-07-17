@@ -1,10 +1,25 @@
 
 {% extends 'leak/base.html' %}
 
+
+{% block title %}
+Leak | Detail
+{% endblock title %}
+
+
+
+
 {% block content %}
 
 {% include 'leak/leak.html' %}
-{% include 'social_share.html' %}
+<div id="social">
+    {% include 'social_share.html' %}
+
+</div>
+
+{% include 'jquery.html' %}
+
+<script src="/static/leak/js/leak.js"></script>
 {% endblock content %}
 
 

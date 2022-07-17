@@ -1,6 +1,6 @@
 {% load social_share %}
 
-<div class="social-share">
+<div data-leak_id="{{leak.id}}" data-share_url="{% url 'leak:add-share-count' leak.id %}" class="social-share">
     <i style="font-size: 11px; color: #999;">
         Share to other social media
     </i>

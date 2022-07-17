@@ -1,6 +1,11 @@
+{% extends 'base.html' %}
 
 
+{% block title %}
+Draft | Leak List
+{% endblock title %}
 
+{% block content %}
 {% for leak in leaks %}
 <div>
     <h4>{{leak.title}}</h4>
@@ -13,3 +18,4 @@
 {% endfor %}
 
 
+{% endblock content %}

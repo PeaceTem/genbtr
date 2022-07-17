@@ -1,9 +1,40 @@
 
 
-<div>
+<div class='card infinite-item'>
     <h4>{{leak.title}}</h4>
+    Remove the unique property from leak title and make sure the slug is unique using get_ref_code
     <p>
-        {{leak.story|safe}}
-        <a href="{% url 'leak:leak-detail' leak.id %}">See More</a> 
+        <div>
+            {{leak.story|safe}}
+        </div>
+
+
+        <span>
+            <a style="font-size:20px; text-decoration: none;" class="upvote-leak" href="{% url 'leak:leak-upvote' leak.id %}">↑</a>
+            <span>
+                {{leak.get_number_of_upvotes}}
+            </span>
+        </span>
+        <span>
+            <a style="font-size:20px; text-decoration: none;" class="downvote-leak" href="{% url 'leak:leak-downvote' leak.id %}">↓</a>
+            <span>
+                {{leak.get_number_of_downvotes}}
+            </span>
+        </span>
+        <span>
+            <a style="font-size:20px; text-decoration: none;" href="{% url 'leak:leak-detail' leak.slug %}">→</a>
+        </span>
+        {% if pg != 'archive' %}
+            <span>
+                <a class="add-leak-to-archive" style="font-size:20px; text-decoration: none;" href="#" data-href="{% url 'archive:add-leak' leak.id %}">+</a>
+            </span>
+        {% else %}
+            <span>
+                <a class="remove-leak-from-archive" style="font-size:20px; text-decoration: none;" href="#" data-href="{% url 'archive:remove-leak' leak.id %}">-</a>
+            </span>
+        {% endif %}
+        <span>
+            <a  style="font-size:20px; text-decoration: none;" href="#">check</a>
+        </span>
     </p>
 </div>

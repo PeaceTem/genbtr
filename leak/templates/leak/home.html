@@ -1,7 +1,11 @@
 
 
 {% extends 'leak/base.html' %}
+{% load static %}
 
+{% block title %}
+Leak | Home
+{% endblock title %}
 
 
 {% block content %}
@@ -15,15 +19,66 @@
 
 {% for c in categories %}
     <div>
-        <a href="{% url 'leak:category-leaks' c.id %}">{{c.title|safe}}</a>
+        <a href="{% url 'leak:category-leaks' c.slug %}">{{c.title|safe}}</a>
     </div>
 {% endfor %}
 <h3>
     Trending Leaks
 </h3>
+
+
+<div class="card-container infinite-container">
+
 {% for leak in leaks %}
     {% include 'leak/leak.html' %}
 {% endfor %}
 create a footer template
 
+</div>
+
+
+<div class="d-flex d-none position-fixed" style="color:white;bottom:2vh;left:46vw">
+    <button style="display:none;" class="btn btn-danger loading">
+        <span style="color:white; display:none" class="spinner-border spinner-border-sm"></span>
+    </button>
+</div>
+
+
+<div class="row d-none">
+    <div class="col-12">
+        {% if leaks.has_next %}
+        <a class="infinite-more-link" href="?page={{ leaks.next_page_number }}">next</a>
+        {% endif %}
+        </span>
+    </div>
+</div>
+
+{% include 'jquery.html' %}
+
+<script src="/static/leak/js/leak.js"></script>
+<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'js/infinite.min.js' %}"></script>
+<script>
+    var infinite = new Waypoint.Infinite({
+        element: $('.infinite-container')[0],
+
+        offset: 'bottom-in-view',
+
+        onBeforePageLoad: function () {
+            $('.loading').show();
+        },
+        onAfterPageLoad: function () {
+            $('.loading').hide();
+
+            function reload_js(src) {
+            $('script[src="' + src + '"]').remove();
+            $('<script>').attr('src', src).appendTo('head');
+            }
+            reload_js("{% static 'leak/js/leak.js' %}");
+
+        }
+        
+    
+    });
+</script>
 {% endblock content %}

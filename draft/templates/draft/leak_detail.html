@@ -1,13 +1,27 @@
 
+{% extends 'base.html' %}
 
 
+{% block title %}
+Draft | Leak Detail
+{% endblock title %}
+
+{% block content %}
 <div>
-    <h4>{{draft.title}}</h4>
-    <p>
-        {{draft.story|safe}}
-        <a href="{% url 'draft:leak-draft-edit' draft.id %}">Edit Item</a> 
-        <a href="{% url 'draft:leak-draft-delete' draft.id %}">Delete Item</a> 
+    <div>
+        <h4>{{draft.title}}</h4>
+        <p>
+            {{draft.story|safe}}
+            <a href="{% url 'draft:leak-draft-edit' draft.id %}">Edit Item</a> 
+            <a id="delete-leak-draft" href="{% url 'draft:leak-draft-delete' draft.id %}">Delete Item</a> 
+    
+            <a href="{% url 'draft:convert-draft-to-leak' draft.id %}">Convert to a Leak</a> 
+        </p>
+    </div>
 
-        <a href="{% url 'draft:convert-draft-to-leak' draft.id %}">Convert to a Leak</a> 
-    </p>
 </div>
+
+{% include 'jquery.html' %}
+
+<script src="/static/draft/js/leak.js"></script>
+{% endblock content %}

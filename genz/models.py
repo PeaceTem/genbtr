@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from leak.models import Subcategory
+
+
+from src.utils import LANGUAGES
 # Create your models here.
 """
 
@@ -12,10 +15,10 @@ Create a list of all languages
 # add each profile to drafts
 class Profile(models.Model):
     SEX =(
-        ('le', _('male')),
-        ('fele', _('female')),
+        ('male', _('male')),
+        ('female', _('female')),
     )
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user', auto_created=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', auto_created=True)
     picture = models.ImageField(upload_to='genz/profile_picture/', null=True, blank=True, verbose_name=_("Picture"))
     first_name = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("First Name"))
     last_name = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("Last Name"))
@@ -26,11 +29,10 @@ class Profile(models.Model):
     state_of_residence = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("state Of Residence"))
     state_of_origin = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("State Of Origin"))
     nationality = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("Nationlity"))
-    language1 = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("First Language"))
-    language2 = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("Second Language"))
+    language1 = models.CharField(max_length=100, choices=LANGUAGES, null=True, blank=True, verbose_name=_("First Language"))
+    language2 = models.CharField(max_length=100, choices=LANGUAGES, null=True, blank=True, verbose_name=_("Second Language"))
     date_updated = models.DateTimeField(auto_now=True)
     views = models.PositiveIntegerField(default=0)
-    subcategories = models.ManyToManyField(Subcategory, blank=True, related_name='profileSubcategories')
 
 
     def __str__(self):
